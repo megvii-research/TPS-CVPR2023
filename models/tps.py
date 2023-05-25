@@ -6,7 +6,7 @@ import megengine as mge
 import numpy as np
 
 
-def cal_cosine_similarity(x, y, mask_eye=-100):
+def cal_cosine_similarity(x, y,eps = 1e-6, mask_eye=-100):
     """
     cacluating the cosine similarity among tokens of each sample in the batch
 
@@ -18,8 +18,13 @@ def cal_cosine_similarity(x, y, mask_eye=-100):
     Returns:
         sim: the cosine similarity used as the cost matrix
     """
+
+    x = x/(F.norm(x,2,axis = -1,keepdims = True) + eps)
     if y is None:
         y = x
+    else:
+        y = y/(F.norm(y,2,axis = -1,keepdims = True) + eps)
+    
     sim = F.matmul(x, y.transpose(0, 2, 1))
     if mask_eye is not None:
 
@@ -91,11 +96,11 @@ class TPS(M.Module):
             cost_matrix = cal_cosine_similarity(
                 pruned, reserved, mask_eye=None)
             sim_th = cost_matrix.max(axis=2, keepdims=True)
-            mask = (cost_matrix == sim_th).float()
+            mask = (cost_matrix == sim_th).astype('float32')
             cost_matrix = mask * cost_matrix
             mask = mask.transpose(0, 2, 1)
             cost_matrix = cost_matrix.transpose(0, 2, 1)
-            numerator = mge.exp(cost_matrix) * mask
+            numerator = F.exp(cost_matrix) * mask
             denominator = math.e + numerator.sum(axis=-1, keepdims=True)
             reserved = reserved * (math.e / denominator) + \
                 F.matmul(numerator / denominator, pruned)
