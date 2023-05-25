@@ -9,18 +9,17 @@ Vision Transformers.
 
 ```
 conda env create -f environment.yml
-
 ```
 
 ## Training & Evaluation
 
 
-train dTPS-DeiT-small on a 8-gpu machine, you can modify hyperparams, including the location index of pruned layers and token keep ratio in the .sh scripts.
+Train dTPS-DeiT on a 8-gpu machine using shell scripts in ./scripts:
 
-'''
+```
 bash scripts/finetune_dtps_deit_s.sh
-'''
-
+```
+you can modify hyperparams in the .sh scripts, including the location index of pruned layers and token keep ratio.
 
 ## Liscense
 TPS-CVPR2023 is released under the Apache 2.0 license. See [LICENSE](LICENSE) for details.
