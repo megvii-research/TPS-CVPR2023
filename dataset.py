@@ -36,9 +36,13 @@ class RASampler(MapSampler):
         num_repeats=3,
     ):
         super().__init__(dataset, batch_size, drop_last, None, world_size, rank, seed)
+        
         self.num_repeats = num_repeats
+        self.num_samples = int( math.ceil(len(self.dataset) * self.num_repeats / self.world_size))
+        self.total_size = self.num_samples * self.world_size
+        
         self.num_selected_samples = int(math.floor(
-            len(self.dataset)//self.world_size * self.world_size))
+            len(self.dataset) // 256 * 256 /self.world_size ))
 
     def sample(self):
         r"""Return a list contains all sample indices."""
@@ -48,11 +52,12 @@ class RASampler(MapSampler):
     def batch(self):
         indices = self.sample()
         indices = np.repeat(indices, self.num_repeats, axis=0).tolist()
-        indices = indices[:self.num_selected_samples]
+        
         total_size = len(indices)
         if self.world_size > 1:
             indices = indices[self.rank: total_size: self.world_size]
-
+        indices = indices[:self.num_selected_samples]
+        
         batch = []
         for idx in indices:
             batch.append(idx)

@@ -1,7 +1,7 @@
 This repo is the official implementation of the CVPR2023 paper: Joint Token Pruning and Squeezing Towards More Aggressive Compression of
 Vision Transformers. 
 
-# [Joint Token Pruning and Squeezing Towards More Aggressive Compression of Vision Transformers]
+# [Joint Token Pruning and Squeezing Towards More Aggressive Compression of Vision Transformers](https://arxiv.org/abs/2304.10716)
 ## Framework & Comparison
 <div style="text-align:center"><img src="pics/main.png" width="100%" ></div>
 

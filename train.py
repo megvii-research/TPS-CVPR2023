@@ -152,13 +152,13 @@ def worker(args):
 
     # enable DTR for less GPU memory , see Marisa Kirisame, Steven Lyubomirsky, Altan Haan, Jennifer Brennan, Mike He, Jared Roesch, Tianqi Chen, and Zachary Tatlock. Dynamic tensor rematerialization. In International Conference on Learning Representations. 2021. URL: https://openreview.net/forum?id=Vfs_2RnOD0H.
     megengine.dtr.enable()
-    
+
     # set seed
     seed = args.seed + dist.get_rank()
     megengine.random.seed(seed)
     np.random.seed(seed)
     random.seed(seed)
-    
+
     logging.info(f'Task : {args.desc}')
     log_dir = os.path.join(args.log_dir, args.dataset, args.arch, args.desc)
     train_writer, val_writer = None, None
