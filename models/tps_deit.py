@@ -35,7 +35,9 @@ PROJECT_DIR = os.path.split(os.path.abspath(__file__))[
     0].replace("models", 'pretrained')
 
 
-def gumbel_softmax(logits, tau=1, hard=False, eps=1e-6, dim=-1):
+# def gumbel_softmax(logits, tau=1, hard=False, eps=1e-6, dim=-1):
+
+def gumbel_softmax(logits, tau=1, hard=False, eps=1e-20, dim=-1):
     def _gen_gumbels():
         gumbels = -F.log(-F.log(uniform(0, 1, size=logits.shape) + eps)+eps)
         # while F.isnan(gumbels).sum() or F.isinf(gumbels).sum():
@@ -52,7 +54,8 @@ def gumbel_softmax(logits, tau=1, hard=False, eps=1e-6, dim=-1):
         index = F.argmax(y_soft, dim, keepdims=True)
         y_hard = F.scatter(F.zeros_like(logits), dim,
                            index, F.ones_like(index))
-        ret = (y_hard - y_soft).detach() + y_soft
+        # ret = (y_hard - y_soft).detach() + y_soft
+        ret = y_hard - y_soft.detach() + y_soft
     else:
         # Reparametrization trick.
         ret = y_soft

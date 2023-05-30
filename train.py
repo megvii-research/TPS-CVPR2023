@@ -3,7 +3,7 @@ import os
 import random
 import time
 from copy import deepcopy
-
+import torch
 import cv2
 import megengine
 import megengine.autodiff as autodiff
@@ -158,6 +158,8 @@ def worker(args):
     megengine.random.seed(seed)
     np.random.seed(seed)
     random.seed(seed)
+    # we use transform from torch and timm for a easy implementation and fair comparison
+    torch.manual_seed(seed)
 
     logging.info(f'Task : {args.desc}')
     log_dir = os.path.join(args.log_dir, args.dataset, args.arch, args.desc)

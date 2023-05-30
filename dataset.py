@@ -36,13 +36,14 @@ class RASampler(MapSampler):
         num_repeats=3,
     ):
         super().__init__(dataset, batch_size, drop_last, None, world_size, rank, seed)
-        
+
         self.num_repeats = num_repeats
-        self.num_samples = int( math.ceil(len(self.dataset) * self.num_repeats / self.world_size))
+        self.num_samples = int(
+            math.ceil(len(self.dataset) * self.num_repeats / self.world_size))
         self.total_size = self.num_samples * self.world_size
-        
+
         self.num_selected_samples = int(math.floor(
-            len(self.dataset) // 256 * 256 /self.world_size ))
+            len(self.dataset) // 256 * 256 / self.world_size))
 
     def sample(self):
         r"""Return a list contains all sample indices."""
@@ -52,12 +53,12 @@ class RASampler(MapSampler):
     def batch(self):
         indices = self.sample()
         indices = np.repeat(indices, self.num_repeats, axis=0).tolist()
-        
+
         total_size = len(indices)
         if self.world_size > 1:
             indices = indices[self.rank: total_size: self.world_size]
         indices = indices[:self.num_selected_samples]
-        
+
         batch = []
         for idx in indices:
             batch.append(idx)
@@ -189,7 +190,8 @@ def load_dataset(name, data_dir, batch_size, workers, args):
         train_sampler = RASampler(
             train_dataset, batch_size=batch_size, drop_last=True)
     train_sampler = data.Infinite(train_sampler)
-    test_sampler = data.SequentialSampler(test_dataset, batch_size=batch_size)
+    test_sampler = data.SequentialSampler(
+        test_dataset, batch_size=batch_size//2)
     train_dataloader = data.DataLoader(
         train_dataset, train_sampler, train_transform, num_workers=workers, preload=True)
     test_dataloader = data.DataLoader(
