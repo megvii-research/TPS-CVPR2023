@@ -3,7 +3,6 @@ import os
 import random
 import time
 from copy import deepcopy
-import torch
 import cv2
 import megengine
 import megengine.autodiff as autodiff
@@ -29,7 +28,7 @@ logging = megengine.logger.get_logger()
 
 def route_and_calculate_loss(criterion_dict, outs, inp, target, model, args, tea_model=None):
 
-    if args.arch.startswith('dtps'):
+    if args.arch.startswith('dtps') or args.arch.startswith('dyn'):
         logit, spatial_tokens, hard_decision_list = outs
     else:
         logit = outs[0]
@@ -149,7 +148,8 @@ def evaluate(model, test_dataloader, epoch, val_writer, best_acc=0):
 
 
 def worker(args):
-
+    if os.environ.get("DEBUG") is not None:
+        megengine.config.async_level = 0
     # enable DTR for less GPU memory , see Marisa Kirisame, Steven Lyubomirsky, Altan Haan, Jennifer Brennan, Mike He, Jared Roesch, Tianqi Chen, and Zachary Tatlock. Dynamic tensor rematerialization. In International Conference on Learning Representations. 2021. URL: https://openreview.net/forum?id=Vfs_2RnOD0H.
     megengine.dtr.enable()
 
@@ -158,8 +158,9 @@ def worker(args):
     megengine.random.seed(seed)
     np.random.seed(seed)
     random.seed(seed)
-    # we use transform from torch and timm for a easy implementation and fair comparison
-    torch.manual_seed(seed)
+    # # we use transform from torch and timm for a easy implementation and fair comparison
+    # import torch
+    # torch.manual_seed(seed)
 
     logging.info(f'Task : {args.desc}')
     log_dir = os.path.join(args.log_dir, args.dataset, args.arch, args.desc)
@@ -364,7 +365,7 @@ def main():
     parser.add_argument('--rank', default=0, type=int)
 
     args = parser.parse_args()
-    cv2.setNumThreads(1)
+
     if args.ngpus is None:
         args.ngpus = dist.helper.get_device_count_by_fork('gpu')
     args.arch_kwargs = args.arch_kwargs if args.arch_kwargs else dict()

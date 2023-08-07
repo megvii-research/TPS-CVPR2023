@@ -10,11 +10,10 @@ loss_cfg='--loss_fns SoftTargetCrossEntropy PruningLoss  --loss_ws 1. 2'
 prune_loc_str="prune${prune_loc//\[/}"
 prune_loc_str="${prune_loc_str//\]/}"
 prune_loc_str="${prune_loc_str//,/}"
-task_name=dtps_deit_t_${keep_ratio}_${prune_loc_str}
+task_name=$(basename $0)_${keep_ratio}_${prune_loc_str}
 
 export CUDA_CACHE_MAXSIZE=2147483647
 export CUDA_CACHE_PATH=/data/.cuda_cache
-
 
 python3 train.py --desc ${task_name} \
     --arch dtps_deit_tiny_patch16_224 --fp16 --workers 4 \

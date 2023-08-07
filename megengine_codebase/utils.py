@@ -80,7 +80,9 @@ def adjust_learning_rate(optimizer: mge.optimizer.Optimizer, epoch: int, max_epo
             (params['baselr'] - warmup_lr_init)/warmup_epochs
             for params in optimizer.param_groups
         ]
-
+    # In dynamicViT and DeiT codebase: https://github.com/raoyongming/DynamicViT
+    # they step the learning rate scheduler after per epoch training
+    # and this leads to the learning rate being warmup_lr_init in the first 2 epochs
     if epoch < warmup_epochs:
         lrs = [warmup_lr_init + epoch * s for s in warmup_steps]
     else:

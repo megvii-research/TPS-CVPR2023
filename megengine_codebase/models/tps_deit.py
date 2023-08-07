@@ -364,7 +364,8 @@ class TPSViT(M.Module):
         **kwargs,
     ):
         super().__init__()
-        assert not tps_type or tps_type.lower() in ('dtps', 'etps')
+        # dynprune stands for pruning from dynamicVit
+        assert not tps_type or tps_type.lower() in ('dtps', 'etps','dynvit')
 
         # hyperparams for compression
         self.tps_type = tps_type
@@ -376,7 +377,7 @@ class TPSViT(M.Module):
                 keep_ratio ** (k+1) for k in range(len(self.prune_loc))
             ]
             self.n_prune = len(self.prune_loc)
-            if self.tps_type.lower() == 'dtps':
+            if self.tps_type.lower() in  ('dtps','dynvit'):
                 # use learnable token scoring from dynamicViT
                 self.score_predictor = [PredictorLG(
                     embed_dim) for _ in range(self.n_prune)]
@@ -483,8 +484,9 @@ class TPSViT(M.Module):
                     # TODO: dTPS and eTPS
                     current_pruned_decision = (
                         1-hard_keep_decision) * prev_decision
-                    spatial_x = self.tps(
-                        spatial_x, None, hard_keep_decision, current_pruned_decision)
+                    if self.tps == 'dtps':
+                        spatial_x = self.tps(
+                            spatial_x, None, hard_keep_decision, current_pruned_decision)
                     x = F.concat([x[:, :1, :], spatial_x], axis=1)
                     hard_decision_list.append(
                         hard_keep_decision.reshape(B, init_n))
@@ -573,6 +575,19 @@ def deit_small_patch16_224(**kwargs):
                    qkv_bias=True, norm_name=partial(M.LayerNorm, eps=1e-6), **kwargs)
     return model
 
+@registers.models.register()
+@hub.pretrained(
+    os.path.join(
+        PROJECT_DIR, "deit_small_patch16_224-torch.pkl"
+    )
+)
+def dyn_deit_small_patch16_224(**kwargs):
+
+    prune_loc = kwargs.pop('prune_loc', [3, 6, 9])
+    keep_ratio = kwargs.pop('keep_ratio', 0.7)
+    model = TPSViT(patch_size=16, embed_dim=384, depth=12, num_heads=6, ffn_ratio=4, qkv_bias=True, norm_name=partial(M.LayerNorm, eps=1e-6),
+                   tps_type='dynvit', keep_ratio=keep_ratio, prune_loc=prune_loc, **kwargs)
+    return model
 
 @registers.models.register()
 @hub.pretrained(

@@ -10,7 +10,7 @@ loss_cfg=' --loss_fns SoftTargetCrossEntropy PruningLoss DistillKLLoss  --loss_w
 prune_loc_str="prune${prune_loc//\[/}"
 prune_loc_str="${prune_loc_str//\]/}"
 prune_loc_str="${prune_loc_str//,/}"
-task_name=dtps_deit_s_${keep_ratio}_${prune_loc_str}
+task_name=$(basename $0)_${keep_ratio}_${prune_loc_str}
 
 export CUDA_CACHE_MAXSIZE=2147483647
 export CUDA_CACHE_PATH=/data/.cuda_cache
@@ -18,7 +18,7 @@ export CUDA_CACHE_PATH=/data/.cuda_cache
 
 export NCCL_IB_DISABLE=1
 python3 train.py --desc ${task_name} \
-    --arch dtps_deit_small_patch16_224 --fp16 --workers 4 \
+    --arch dyn_deit_small_patch16_224 --fp16 --workers 4 \
     ${data_cfg} ${learning_cfg} ${loss_cfg} \
     --arch_kwargs "dict( prune_loc=${prune_loc},keep_ratio=${keep_ratio})" \
     
