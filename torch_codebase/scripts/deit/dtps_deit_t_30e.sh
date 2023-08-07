@@ -3,11 +3,8 @@
 n_proc=4
 
 deit_aug_settings="--input-size 224 --reprob 0.25 --smoothing 0.1 --mixup .8 --cutmix 1.0 --repeated-aug --color-jitter 0.3  --aa rand-m9-mstd0.5-inc1"
-deit_lr_sch_opt_loss_settings="--batch-size 1024 --lr 1e-3 --unscale-lr --epochs 300 --weight-decay 0.05 --sched cosine --model-ema   --opt adamw  --warmup-lr 1e-6 --warmup-epochs 5"
-dynamic_prune_lr_sch_opt_loss_settings="--batch-size 1024  --lr 2.5e-4 --unscale-lr  --epochs 100 --weight-decay 0.05 --sched cosine   --opt adamw  --warmup-lr 1e-6 --warmup-epochs 5 --backbone_freeze_epochs -1 --backbone_lr_scale 1e-2"
-deit_net_settings="--arch_kwargs 'dict( drop_rate=0, attn_drop_rate=0., drop_path_rate=0.1, )'"
-
-deit1_dynamicViT_args="${deit_aug_settings} ${dynamic_prune_lr_sch_opt_loss_settings} --token_prune   --pretrain --axu_loss KeepRatioLoss  --axu_w 2"
+dynamic_prune_lr_sch_opt_loss_settings="--batch-size 1024  --lr 2.5e-4 --unscale-lr  --epochs 30 --weight-decay 0.05 --sched cosine   --opt adamw  --warmup-lr 1e-6 --warmup-epochs 5 --backbone_freeze_epochs -1 --backbone_lr_scale 1e-2"
+train_setting="${deit_aug_settings} ${dynamic_prune_lr_sch_opt_loss_settings} --token_prune   --pretrain --axu_loss KeepRatioLoss  --axu_w 2"
 
 prefix=$(basename $0) # 当前shell脚本的文件名
 rerun_num=1
@@ -36,7 +33,7 @@ do
                     python3 -m torch.distributed.launch --nproc_per_node=${n_proc} --use_env train.py --data_path /data/datasets/imagenet1k \
                     --grad_checkpoint \
                     --fp16  -c  -dist-eval --pin-mem  --dataset ImageNet \
-                    --arch $arch ${deit1_dynamicViT_args} \
+                    --arch $arch ${train_setting} \
                     --arch_kwargs "dict( prune_loc=${prune_loc},keep_ratio=${keep_ratio} )" \
                     --task_name ${task_name} --seed ${rerun_i};
                 # exit while exit code == 0
