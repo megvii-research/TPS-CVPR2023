@@ -16,7 +16,6 @@ import torch
 import torch.distributed as dist
 import torchvision.models as models
 from accelerate import Accelerator
-from neupeak.train.logger.worklog_logger import WorklogLogger, log_rate_limited
 from timm.models.vision_transformer import Attention, Block, VisionTransformer
 from torch.optim import SGD, Adam, AdamW, RMSprop
 

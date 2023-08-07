@@ -4,7 +4,7 @@ import logging
 from git import Repo
 
 base_dir = os.getcwd()
-local_repo = Repo(base_dir)
+local_repo = Repo(os.path.abspath(os.path.join(base_dir,'..')))
 branch_name = local_repo.active_branch.name
 
 
